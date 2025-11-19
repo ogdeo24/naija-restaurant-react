@@ -1,0 +1,12 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0e0f12; /* same as bg color */
+  color: #f2f4f8;      /* same as text color */
+}
+
+/* We'll do our layout & design with Tailwind classes in the React components */
