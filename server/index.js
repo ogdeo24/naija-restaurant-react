@@ -107,5 +107,5 @@ app.post("/api/seed-menu", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`API server running on port ${PORT}`));
