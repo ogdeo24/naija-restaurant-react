@@ -1,17 +1,65 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-const CartCtx = createContext();
+
+const CartCtx = createContext(null);
+
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem("cart")||"[]"));
-  useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
-  const add = (name, price) => setCart(prev=>{
-    const i = prev.findIndex(x=>x.name===name);
-    if(i>=0){ const c=[...prev]; c[i]={...c[i],quantity:c[i].quantity+1}; return c; }
-    return [...prev,{name,price,quantity:1}];
+  const [cart, setCart] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("cart")) || [];
+    } catch {
+      return [];
+    }
   });
-  const remove = (name)=> setCart(prev=> prev.filter(x=>x.name!==name));
-  const clear = ()=> setCart([]);
-  const count = useMemo(()=> cart.reduce((s,x)=>s+x.quantity,0),[cart]);
-  const total = useMemo(()=> cart.reduce((s,x)=>s+x.price*x.quantity,0),[cart]);
-  return <CartCtx.Provider value={{cart,add,remove,clear,count,total}}>{children}</CartCtx.Provider>;
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+
+  const add = (item) => {
+    setCart((prev) => {
+      const index = prev.findIndex((x) => x.name === item.name);
+
+      if (index >= 0) {
+        const updated = [...prev];
+        updated[index] = {
+          ...updated[index],
+          quantity: updated[index].quantity + 1,
+        };
+        return updated;
+      }
+
+      return [...prev, { ...item, quantity: item.quantity ?? 1 }];
+    });
+  };
+
+  const remove = (name) => {
+    setCart((prev) => prev.filter((x) => x.name !== name));
+  };
+
+  const clear = () => setCart([]);
+
+  const count = useMemo(
+    () => cart.reduce((sum, x) => sum + x.quantity, 0),
+    [cart]
+  );
+
+  const total = useMemo(
+    () => cart.reduce((sum, x) => sum + x.price * x.quantity, 0),
+    [cart]
+  );
+
+  return (
+    <CartCtx.Provider value={{ cart, add, remove, clear, count, total }}>
+      {children}
+    </CartCtx.Provider>
+  );
 }
-export const useCart = ()=> useContext(CartCtx);
+
+export const useCart = () => {
+  const ctx = useContext(CartCtx);
+  if (!ctx) {
+    throw new Error("useCart must be used inside CartProvider");
+  }
+  return ctx;
+};
